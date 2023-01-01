@@ -13,16 +13,16 @@ namespace Basics;
 // https://bartoszmilewski.com/2015/01/20/functors/
 // https://en.wikipedia.org/wiki/Functor
 
-public record MyFunctorType1<T>(T Value)
+public record MyFunctorType<T>(T Value)
 {
     // Func<T, T> id = x => x;
     public static T Identity(T value) => value;
 
-    public MyFunctorType1<TResult> Map<TResult>(Func<T, TResult> map)
+    public MyFunctorType<TResult> Map<TResult>(Func<T, TResult> map)
         => new(map(Value));
 
     // This function signature is required for using LINQ select query syntax
-    public MyFunctorType1<TResult> Select<TResult>(Func<T, TResult> selector)
+    public MyFunctorType<TResult> Select<TResult>(Func<T, TResult> selector)
         => Map(selector);
 }
 
@@ -33,8 +33,8 @@ public class FunctorTests
     public void TestFirstFunctorLaw(int v)
     {
         // Arrange
-        var functor = new MyFunctorType1<int>(v);
-        var id = MyFunctorType1<int>.Identity;
+        var functor = new MyFunctorType<int>(v);
+        var id = MyFunctorType<int>.Identity;
 
         // Act
         var areEqual = functor.Map(id) == functor;
@@ -49,7 +49,7 @@ public class FunctorTests
     public void TestSecondFunctorLaw(int v)
     {
         // Arrange
-        var functor = new MyFunctorType1<int>(v);
+        var functor = new MyFunctorType<int>(v);
 
         // G = INT -> STRING
         Func<int, string> g = i => $"{i}";
@@ -69,7 +69,7 @@ public class FunctorTests
     public void MapFunctionInQuerySyntax(int v)
     {
         // Arrange
-        var functor = new MyFunctorType1<int>(v);
+        var functor = new MyFunctorType<int>(v);
 
         // Act
         var result = from f in functor
