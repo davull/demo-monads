@@ -58,8 +58,8 @@ public class FunctorTests
 
         // Act
         // (f . g)(x) = f(g(x))
-        var areEqual = functor.Select(g).Select(f) ==
-                       functor.Select(i => f(g(i)));
+        var areEqual = functor.Map(g).Map(f) ==
+                       functor.Map(i => f(g(i)));
 
         // Assert
         Assert.True(areEqual);
