@@ -7,6 +7,14 @@
         <LangVersion>11</LangVersion>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+
     <ItemGroup>
       <PackageReference Include="FsCheck.Xunit" Version="2.16.5" />
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
