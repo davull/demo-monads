@@ -83,6 +83,9 @@ public sealed class Maybe<T>
     }
 
     public override bool Equals(object? obj) => obj is Maybe<T> that && Equals(Item, that.Item);
+
+    public static bool operator ==(Maybe<T> left, Maybe<T> right) => left.Equals(right);
+    public static bool operator !=(Maybe<T> left, Maybe<T> right) => !(left == right);
 }
 
 public static class MaybeExtensions
@@ -102,6 +105,13 @@ public static class MaybeExtensions
         Func<T, U, TResult> s)
     {
         return source.Bind(x => k(x).Select(y => s(x, y)));
+    }
+
+    public static Func<T, Maybe<T2>> Compose<T, T1, T2>(
+        this Func<T, Maybe<T1>> action1,
+        Func<T1, Maybe<T2>> action2)
+    {
+        return x => action1(x).Bind(action2);
     }
 }
 
@@ -232,5 +242,70 @@ public class MaybeTests
             case double.PositiveInfinity: return Maybe<double>.None();
             default: return Maybe<double>.Some(result);
         }
+    }
+}
+
+public class MaybeMonadLawsTests
+{
+    // First monad law: Left identity
+    [Property]
+    public void TestFirstMonadLaw(int v)
+    {
+        // Arrange
+        Func<int, Maybe<int>> @return = i => i % 2 == 0
+            ? Maybe<int>.Some(i)
+            : Maybe<int>.None();
+        Func<int, Maybe<string>> g = i => i % 2 == 0
+            ? Maybe<string>.Some($"{i}")
+            : Maybe<string>.None();
+
+        // Act
+        Func<int, Maybe<string>> composed = @return.Compose(g);
+        var areEqual = composed(v) == g(v);
+
+        // Assert
+        Assert.True(areEqual);
+    }
+
+    // Second monad law: Right identity
+    [Theory]
+    [InlineData("")]
+    [InlineData("abc")]
+    [InlineData("lorem ipsum")]
+    public void TestSecondMonadLaw(string v)
+    {
+        // Arrange
+        Func<int, Maybe<int>> @return = Maybe<int>.Some;
+        Func<string, Maybe<int>> g = s => Maybe<int>.Some(s.Length);
+
+        // Act
+        Func<string, Maybe<int>> composed = g.Compose(@return);
+        var areEqual = composed(v) == g(v);
+
+        // Assert
+        Assert.True(areEqual);
+    }
+
+    // Third monad law: Associativity
+    [Property]
+    public void TestThirdMonadLaw(double v)
+    {
+        // Arrange
+
+        // F: DOUBLE -> BOOL
+        Func<double, Maybe<bool>> f = d => Maybe<bool>.Some(d % 2 == 0);
+        // G: BOOL -> STRING
+        Func<bool, Maybe<string>> g = b => Maybe<string>.Some($"{b}");
+        // H: STRING -> INT
+        Func<string, Maybe<int>> h = s => Maybe<int>.Some(s.Length);
+
+        Func<double, Maybe<int>> left = (f.Compose(g)).Compose(h);
+        Func<double, Maybe<int>> right = f.Compose(g.Compose(h));
+
+        // Act
+        var areEqual = left(v) == right(v);
+
+        // Assert
+        Assert.True(areEqual);
     }
 }
