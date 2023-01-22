@@ -1,7 +1,7 @@
 ﻿using FsCheck.Xunit;
 using Xunit;
 
-namespace Monads.Maybe;
+namespace Monads;
 
 public sealed class Maybe<T>
 {
